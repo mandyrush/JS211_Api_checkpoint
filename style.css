@@ -1,0 +1,38 @@
+#displayPlayerCards {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#displayPlayerCards .card {
+    cursor: pointer;
+}
+
+#displayPlayerCards .card.selected {
+    border: 3px solid red;
+}
+
+#playerSelectMsg,
+#selectedCardContainer {
+    display: none;
+    text-align: center;
+    padding: 1rem;
+    margin: 1rem 0;
+    background-color: grey;
+    color: #fff;
+}
+
+#playerSelectMsg.show,
+#selectedCardContainer.show {
+    display: block;
+}
+
+#guessMsg {
+    display: none;
+    text-align: center;
+    font-size: 3rem;
+    color: blue;
+}
+
+#guessMsg.show {
+    display: block;
+}
