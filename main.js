@@ -31,6 +31,10 @@ const newGame = () => {
         drawCards(json.deck_id, 7, 'computer');
         // Draw cards for player
         drawCards(json.deck_id, 7, 'player');
+
+        // Set initial scores
+        updateScore();
+        console.log('Initial gameState: ', gameState);
     })
 }
 
@@ -45,13 +49,18 @@ const drawCards = (deckId, numCards, turn) => {
         // Set the computer / player cards in the gamestate
         json.cards.forEach(card => {
             gameState[turn]['cards'].push(card);
+
+            if (hasFourOfAKind(turn, card.value)) {
+                addPoint(turn);
+                discardMatches(turn, card.value);
+            }
         });
 
         gameState.remainingCards = json.remaining;
 
-        console.log('Initial gameState: ', gameState);
-
-        showPlayerCards (gameState[turn]['cards']);
+        if(turn === 'player') {
+            showPlayerCards (gameState[turn]['cards']);
+        }
     })
 }
 
@@ -62,9 +71,6 @@ const createPlayerCards = (cards) => {
         let newCard = createCard(card);
         displayPlayerCards.append(newCard);
     });
-
-    // Set initial scores
-    updateScore();
 }
 
 const createCard = (card) => {
@@ -96,22 +102,36 @@ const createCard = (card) => {
 
 const showPlayerCards = (cards) => {
     createPlayerCards(cards);
-    // createPlayerCards(gameState.player.cards);
     if (gameState.turn === 'player') {
         showPlayerSelectMsg();
-    } else {
-        computerTurn();
     }
 }
 
 const playerTurn = () => {
+    if (gameState.player.cards.length === 0) {
+        drawCards(gameState.deck.deck_id, 5, 'player');
+    }
+    
     showSelectedCardContainer();
 
     // Player selects a card from their hand to ask computer for
     console.log('Card Requested: ', gameState.player.selectedCard);
     let requestedCard = gameState.player.selectedCard;
     
-    compareCards(requestedCard);
+    if (checkForMatches(requestedCard)) {
+        createPlayerCards(gameState.player.cards);
+        hideSelectedCardContainer();
+        console.log('New gameState: ', gameState);
+    } else {
+        // Show Go Fish message
+        showTurnMsg('Go Fish!');
+        hideSelectedCardContainer();
+        hidePlayerSelectMsg();
+        changeTurns();
+        drawCards(gameState.deck.deck_id, 1, 'player');
+        console.log('New gameState: ', gameState);
+        computerTurn();
+    }
 }
 
 const computerTurn = () => {
@@ -119,15 +139,35 @@ const computerTurn = () => {
     setTimeout(() => {
         showTurnMsg('Computer\'s Turn!');
 
+        if (gameState.computer.cards.length === 0) {
+            drawCards(gameState.deck.deck_id, 5, 'computer');
+        }
+
         //Pick a card from computer hand
         let selectedCard = gameState.computer.cards[Math.floor(Math.random() * gameState.computer.cards.length)];
         console.log('Selected Card: ', selectedCard);
 
-        compareCards(selectedCard);
+        showComputerTurnInfo(selectedCard.value);
+
+        setTimeout(() => {
+            if (checkForMatches(selectedCard.value)) {
+                createPlayerCards(gameState.player.cards);
+                console.log('New gameState: ', gameState);
+                computerTurn();
+            } else {
+                showTurnMsg('Your Turn!');
+                showPlayerSelectMsg();
+                changeTurns();
+                drawCards(gameState.deck.deck_id, 1, 'computer');
+                console.log('New gameState: ', gameState);
+                showSelectedCardContainer();
+            }
+        }, 5000)
+        
     }, 2000);
 }
 
-const compareCards = (requestedCard) => {
+const checkForMatches = (requestedCard) => {
     // Check to see if the opponent has matching cards
     let opponentMatches = gameState[gameState.opponent].cards.filter(card => card.value === requestedCard);
     let turnMatches = gameState[gameState.turn].cards.filter(card => card.value === requestedCard);
@@ -138,56 +178,49 @@ const compareCards = (requestedCard) => {
         
         if (opponentMatchNum + turnMatchNum === 4) {
             // Add a point for the turn
-            gameState[gameState.turn].score += 1;
+            addPoint(gameState.turn);
 
             // Remove matching cards from turn
-            let newTurnCards = gameState[gameState.turn].cards.filter(card => card.value !== requestedCard);
-            gameState[gameState.turn].cards = newTurnCards;
+            discardMatches(gameState.turn, requestedCard);
 
             // Remove matching cards from opponent
-            let newOpponentCards = gameState[gameState.opponent].cards.filter(card => card.value !== requestedCard);
-            gameState[gameState.opponent].cards = newOpponentCards;
+            discardMatches(gameState.opponent, requestedCard);
+
+            updateScore();
         } else {
             // Add opponents matching cards to turn's hand
             let matchingOpponentCards = gameState[gameState.opponent].cards.filter(card => card.value === requestedCard);
             matchingOpponentCards.forEach(card => gameState[gameState.turn].cards.push(card));
 
             // Remove matching cards from opponent
-            let newOpponentCards = gameState[gameState.opponent].cards.filter(card => card.value !== requestedCard);
-            gameState[gameState.opponent].cards = newOpponentCards;
+            discardMatches(gameState.opponent, requestedCard);
         }
-        
-        createPlayerCards(gameState.player.cards);
-
-        if (gameState.turn === 'player') {
-            hideSelectedCardContainer();
-        }
-    } else {
-        // Change Turns
-        if (gameState.turn === 'player') {
-            gameState.turn = 'computer';
-            gameState.opponent = 'player';
-
-            // Show Go Fish message
-            showTurnMsg('Go Fish!');
-
-            hideSelectedCardContainer();
-
-            hidePlayerSelectMsg();
-        } else {
-            gameState.turn = 'player';
-            gameState.opponent = 'computer';
-
-            // Show Your Turn message
-            showTurnMsg('Your Turn!');
-
-            showPlayerSelectMsg();
-        }
-
-        drawCards(gameState.deck.deck_id, 1, gameState.turn);
     }
+    return opponentMatches.length > 0;
+}
 
-    console.log('New gameState: ', gameState);
+const discardMatches = (turn, cardValue) => {
+    let removeMatches = gameState[turn].cards.filter(card => card.value !== cardValue);
+    gameState[turn].cards = removeMatches;
+}
+
+const hasFourOfAKind = (turn, cardValue) => {
+    let matches = gameState[turn].cards.filter(card => card.value === cardValue);
+    return matches.length === 4;
+}
+
+const addPoint = (turn) => {
+    gameState[turn].score +=1
+}
+
+const changeTurns = () => {
+    if (gameState.turn === 'player') {
+        gameState.turn = 'computer';
+        gameState.opponent = 'player';
+    } else {
+        gameState.turn = 'player';
+        gameState.opponent = 'computer';
+    }
 }
 
 const showTurnMsg = (msg) => {
@@ -218,6 +251,17 @@ const hideSelectedCardContainer = () => {
     selectedCardContainer.classList.remove('show');
 }
 
+const showComputerTurnInfo = (info) => {
+    let computerTurnInfo = document.getElementById('computerTurnInfo');
+    computerTurnInfo.innerHTML = `The computer has requested: ${info}`;
+    computerTurnInfo.classList.add('show');
+}
+
+const hideComputerTurnInfo = () => {
+    let computerTurnInfo = document.getElementById('computerTurnInfo');
+    computerTurnInfo.classList.remove('show');
+}
+
 const updateScore = () => {
     let playerScoreContainer = document.getElementById('playerScore');
     let computerScoreContainer = document.getElementById('computerScore');   
@@ -226,9 +270,6 @@ const updateScore = () => {
     computerScoreContainer.innerHTML = `Computer Score: ${gameState.computer.score}`;
 }
 
-
-
-
 // Get a deck of cards
 const play = () => {
     // Create new deck
@@ -236,10 +277,6 @@ const play = () => {
 }
 
 play();
-
-
-// Repeat turn steps for computer asking player
-// If either the computer or player runs out of cards, draw 1
 
 // When all cards are gone the game is over
 // Compare the scores to see who won

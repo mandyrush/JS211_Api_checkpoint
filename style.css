@@ -1,13 +1,13 @@
 #displayPlayerCards {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(10, 100px);
 }
 
 #displayPlayerCards .card {
     cursor: pointer;
 }
 
-#displayPlayerCards .card.selected {
+#displayPlayerCards .card.selected img {
     border: 3px solid red;
 }
 
@@ -35,4 +35,13 @@
 
 #guessMsg.show {
     display: block;
+}
+
+#computerTurnInfo {
+    display: none;
+}
+
+#computerTurnInfo.show {
+    display: block;
+    text-align: center;
 }
