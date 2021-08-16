@@ -1,3 +1,21 @@
+h1 {
+    text-align: center;
+}
+
+p {
+    margin: 1rem;
+}
+
+.game-info {
+    display: grid;
+    grid-template-columns: auto 1fr;
+}
+
+.game-stats,
+.game-actions {
+    padding: 1rem;
+}
+
 #displayPlayerCards {
     display: grid;
     grid-template-columns: repeat(10, 100px);
@@ -9,6 +27,8 @@
 
 #displayPlayerCards .card.selected img {
     border: 3px solid red;
+    border-radius: 15px;
+    margin-top: -1rem;
 }
 
 #playerSelectMsg,
@@ -17,8 +37,7 @@
     text-align: center;
     padding: 1rem;
     margin: 1rem 0;
-    background-color: grey;
-    color: #fff;
+    color: #000;
 }
 
 #playerSelectMsg.show,
@@ -26,15 +45,24 @@
     display: block;
 }
 
-#guessMsg {
+#message {
     display: none;
     text-align: center;
     font-size: 3rem;
     color: blue;
 }
 
-#guessMsg.show {
+#message.show {
     display: block;
+}
+
+#playerTurnInfo {
+    display: none;
+}
+
+#playerTurnInfo.show {
+    display: block;
+    text-align: center;
 }
 
 #computerTurnInfo {
