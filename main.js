@@ -86,7 +86,9 @@ const drawCards = (deckId, numCards, turn, initialTurn) => {
         updateGameInfo();
 
         if(turn === 'player') {
-            showPlayerCards (gameState[turn]['cards']);
+            setTimeout(() => {
+                showPlayerCards (gameState[turn]['cards']);
+            }, 1000);
         } 
     })
 }
@@ -170,15 +172,12 @@ const playerTurn = () => {
     let requestedCard = gameState.player.selectedCard.value;
     
     if (checkForMatches(requestedCard)) {
-        updateGameInfo();
-        createPlayerCards(gameState.player.cards);
-        hideSelectedCardContainer();
-        console.log('New gameState: ', gameState);
-
-        if (checkForWin()) {
-            showMessage(winnerMsg());
-            resetGame();
-        }
+        setTimeout(() => {
+            updateGameInfo();
+            createPlayerCards(gameState.player.cards);
+            hideSelectedCardContainer();
+            console.log('New gameState: ', gameState);
+        }, 1000);
     } else {
         // Show Go Fish message
         showMessage('Go Fish!');
@@ -186,14 +185,10 @@ const playerTurn = () => {
         hidePlayerSelectMsg();
         changeTurns();
         drawCards(gameState.deck.deck_id, 1, 'player', false);
-        if (checkForWin()) {
-            showMessage(winnerMsg());
-            resetGame();
-        } else {
-            setTimeout(() => {
-                computerTurn();
-            }, 3000);
-        }
+        
+        setTimeout(() => {
+            computerTurn();
+        }, 4000);
         console.log('New gameState: ', gameState);
     }
 }
@@ -207,45 +202,43 @@ const computerTurn = () => {
         drawCards(gameState.deck.deck_id, 5, 'computer', false);
     }
 
-    //Pick a random card from computer hand
-    let selectedCard = '';
-    if (gameState.computer.cards.length === 1) {
-        selectedCard = 0;
-    } else {
+    // Pick a random card from computer hand
+    // Set a default selected card
+    let selectedCard;
+
+    if (gameState.computer.cards.length >= 1) {
+        console.log("Random Number: ", Math.floor(Math.random() * gameState.computer.cards.length));
         selectedCard = gameState.computer.cards[Math.floor(Math.random() * gameState.computer.cards.length)];
+    } else {
+        selectedCard = gameState.computer.cards[0];
     }
+
     console.log('Selected Card: ', selectedCard);
 
     showComputerTurnInfo(selectedCard);
 
-    setTimeout(() => {
-        if (checkForMatches(selectedCard.value)) {
+    if (checkForMatches(selectedCard.value)) {
+        setTimeout(() => {
             updateGameInfo();
             createPlayerCards(gameState.player.cards);
             console.log('New gameState: ', gameState);
-
-            if (checkForWin()) {
-                showMessage(winnerMsg());
-                resetGame();
-            } else {
-                computerTurn();
-            }
-        } else {
-            drawCards(gameState.deck.deck_id, 1, 'computer', false);
-            if (checkForWin()) {
-                showMessage(winnerMsg());
-                resetGame();
-            } else {
-                setTimeout(() => {
-                    hideComputerTurnInfo();
-                    showMessage('Your Turn!');
-                    showPlayerSelectMsg();
-                    changeTurns();
-                }, 3000);
-            }
-            console.log('New gameState: ', gameState);
-        }
-    }, 5000);
+        }, 2000);
+        
+        setTimeout(() => {
+            computerTurn();
+        }, 4000);
+    } else {
+        drawCards(gameState.deck.deck_id, 1, 'computer', false);
+        
+        setTimeout(() => {
+            hideComputerTurnInfo();
+            showMessage('Your Turn!');
+            showPlayerSelectMsg();
+            changeTurns();
+        }, 4000);
+        
+        console.log('New gameState: ', gameState);
+    }
 }
 
 const checkForMatches = (requestedCard) => {
@@ -283,11 +276,20 @@ const checkForMatches = (requestedCard) => {
 const recordMatches = (turn, cardValue) => {
     addPoint(turn);
     updateScore();
+    setTimeout(() => {
+        let capitalName = turn.charAt(0).toUpperCase() + turn.slice(1);
+        showMessage(`${capitalName} got a match!`);
+    },3000);
 
     console.log(`Record Matches ${turn} ${cardValue}`);
     
     gameState[turn].matches.push(cardValue);
-    
+
+    console.log('Check for Win returns: ', checkForWin());
+    if (checkForWin()) {
+        showMessage(winnerMsg());
+        resetGame();
+    }
 }
 
 const discardMatches = (turn, cardValue) => {
@@ -301,7 +303,7 @@ const hasFourOfAKind = (turn, cardValue) => {
 }
 
 const checkForWin = () => {
-    return gameState.remainingCards === 0 && gameState.player.cards.length === 0 && gameState.computer.cards.length === 0;
+    return gameState.remainingCards === 0 && gameState.player.cards.length === 0 || gameState.remainingCards === 0 && gameState.computer.cards.length === 0;
 }
 
 resetGame = () => {
@@ -352,7 +354,11 @@ const changeTurns = () => {
 
 const showCardsDrawn = (cards) => {
     let playerTurnInfo = document.getElementById('playerTurnInfo');
-    playerTurnInfo.innerHTML = 'You Drew: ';
+    playerTurnInfo.innerHTML = '';
+
+    let p = document.createElement('p');
+    p.innerHTML = 'You Drew: ';
+    playerTurnInfo.append(p);
 
     cards.forEach(card => {
         let img = document.createElement('img');
@@ -402,7 +408,12 @@ const showComputerTurnInfo = (info) => {
     computerTurnInfo.innerHTML = '';
 
     let img = document.createElement('img');
-    img.setAttribute('src', info.image);
+    if (info) {
+        img.setAttribute('src', info.image);    
+    } else {
+        console.log('There was an error with the api image');
+    }
+    
     img.classList.add('computer-selected-card');
 
     let p = document.createElement('p');
@@ -447,9 +458,9 @@ play();
 
 
 // @Todos
+// If there is a match and no remaining cards in hand, draw from deck
 // Make sure win game and reset are successful
-// Notify user when they make a match or get a point
-// Notify user when computer makes a match or gets a point
+
 // Make front end pretty
 // Add "Let's Play Go Fish!" animation before game starts
 // Tests
