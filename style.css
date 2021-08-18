@@ -56,6 +56,17 @@ p {
     display: block;
 }
 
+#turnMessage {
+    display: none;
+    text-align: center;
+    font-size: 3rem;
+    color: blue;
+}
+
+#turnMessage.show {
+    display: block;
+}
+
 #playerTurnInfo {
     display: none;
 }
@@ -72,4 +83,12 @@ p {
 #computerTurnInfo.show {
     display: block;
     text-align: center;
+}
+
+#resetGameContainer {
+    display: none;
+}
+
+#resetGameContainer.show {
+    display: block;
 }
