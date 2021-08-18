@@ -6,34 +6,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./style.css">
     <script src="./main.js" defer></script>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Palette+Mosaic&family=Poppins:wght@400&display=swap" rel="stylesheet">
     <title>Document</title>
 </head>
 <body>
-    <h1>Go Fish</h1>
-    <div class="game-info">
-        <div class="game-stats">
-            <p id="playerScore"></p>
-            <p id="computerScore"></p>
-            <p id="cardsRemainingInDeck"></p>
-            <p id="playerMatches"></p>
-            <p id="computerMatches"></p>
-        </div>
+    <main>
+        <div class="game-info">
+            <div class="game-stats">
+                <p id="playerScore"></p>
+                <p id="computerScore"></p>
+                <p id="cardsRemainingInDeck"></p>
+                <p id="playerMatches"></p>
+                <p id="computerMatches"></p>
+                <p id="errorMsg">Something went wrong...<br>please try again.</p>
+            </div>
 
-        <div class="game-actions">
-            <p id="message"></p>
-            <p id="turnMessage"></p>
-            <div id="resetGameContainer">
-                <button id="resetGameBtn" onclick="resetGame()">Reset Game</button>
+            <div class="game-actions">
+                <p id="turnMessage"></p>
+                <p id="message"></p>
+                
+                <p id="playerSelectMsg">Select a card to request...</p>
+                <div id="selectedCardContainer">
+                    <button id="selectedCardBtn" class="btn btn-primary" onclick="playerTurn()"></button>
+                </div>
+                <div class="turn-info">
+                    <div id="computerTurnInfo"></div>
+                    <div id="playerTurnInfo"></div>
+                </div>
+                <div id="resetGameContainer">
+                    <button id="resetGameBtn" class="btn btn-primary" onclick="resetGame()">Reset Game</button>
+                </div>
             </div>
-            <div id="computerTurnInfo"></div>
-            <div id="playerTurnInfo"></div>
-            <p id="playerSelectMsg">Select a card to request...</p>
-            <div id="selectedCardContainer">
-                <button id="selectedCardBtn" onclick="playerTurn()"></button>
-            </div>
+        </div>
+        
+        <div>
+            <header>
+                <h1>Go Fish</h1>
+                <p>Match 4 to score!</p>
+            </header>
+            <div id="displayPlayerCards"></div>
         </div>
     </div>
-    
-    <div id="displayPlayerCards"></div>
 </body>
 </html>

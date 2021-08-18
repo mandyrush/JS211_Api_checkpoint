@@ -20,7 +20,7 @@ let gameState = {
 }
 
 const newGame = () => {
-    return fetch('https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1')
+    fetch('https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1')
     .then(response => {
         // extract the json from the response
         // console.log("Response Status: ", response.status);
@@ -38,6 +38,13 @@ const newGame = () => {
         // Set initial scores
         updateScore();
         console.log('Initial gameState: ', gameState);
+    }).catch(error => {
+        console.log('Error: ', error);
+        showErrorMsg();
+
+        setTimeout(() => {
+            hideErrorMsg();
+        }, 7000)
     })
 }
 
@@ -87,7 +94,7 @@ const drawCards = (deckId, numCards, turn, initialTurn) => {
                     return;
                 }
             }
-        });
+        })
 
         // Update the cards remaining in the deck
         gameState.remainingCards = json.remaining;
@@ -99,8 +106,15 @@ const drawCards = (deckId, numCards, turn, initialTurn) => {
         if(turn === 'player') {
             setTimeout(() => {
                 showPlayerCards (gameState[turn]['cards']);
-            }, 1000);
+            }, 2000);
         } 
+    }).catch(error => {
+        console.log('Error: ', error);
+        showErrorMsg();
+
+        setTimeout(() => {
+            hideErrorMsg();
+        }, 7000)
     })
 }
 
@@ -168,7 +182,8 @@ const showPlayerCards = (cards) => {
 }
 
 const playerTurn = () => {
-    showTurnMessage("Your Turn!");
+    showTurnMessage("Your Turn");
+    hideMessage();
 
     // If the player doesn't have any cards in their hand, draw new ones
     if (gameState.player.cards.length === 0) {
@@ -198,7 +213,7 @@ const playerTurn = () => {
             if (gameState.player.cards.length === 0) {
                 drawCards(gameState.deck.deck_id, 5, 'player', false);
             }
-        }, 1000);
+        }, 2000);
     } else {
         // Show Go Fish message
         // Draw a card
@@ -212,6 +227,7 @@ const playerTurn = () => {
         
         setTimeout(() => {
             computerTurn();
+            hideMessage();
         }, 3000);
         console.log('New gameState: ', gameState);
     }
@@ -219,7 +235,8 @@ const playerTurn = () => {
 
 const computerTurn = () => {
     // Show Computer's Turn message
-    showTurnMessage('Computer\'s Turn!');
+    showTurnMessage("Computer's Turn");
+    hideMessage();
     hideCardsDrawn();
 
     // Check for a win
@@ -275,8 +292,9 @@ const computerTurn = () => {
                 // Hide messages about computer's turn
                 // Show messages about player's turn
                 changeTurns();
+                hideMessage();
                 hideComputerTurnInfo();
-                showTurnMessage('Your Turn!');
+                showTurnMessage('Your Turn');
                 showPlayerSelectMsg();
             }, 3000);
             
@@ -307,7 +325,7 @@ const checkForMatches = (requestedCard, turn) => {
 
             updateScore();
         } else {
-            showMessage(turn + ' picked up card(s)!');
+            showMessage(turn + ' got a match!');
             // If there are not 4 of a kind in the match
             // Add opponents matching cards to turn's hand
             let matchingOpponentCards = gameState[gameState.opponent].cards.filter(card => card.value === requestedCard);
@@ -329,7 +347,7 @@ const recordMatches = (turn, cardValue) => {
         // Show a message that there was a match 
         // Make the message look better by capitalizing the first letter
         let capitalName = turn.charAt(0).toUpperCase() + turn.slice(1);
-        showMessage(`${capitalName} got a match!`);
+        showMessage(`${capitalName} got a point!`);
     },3000);
 
     console.log(`Record Matches ${turn} ${cardValue}`);
@@ -387,11 +405,10 @@ const checkForWin = () => {
 }
 
 resetGame = () => {
-    showTurnMessage("Player's Turn");
-    hideComputerTurnInfo();
-    hideComputerTurnInfo();
-    hideSelectedCardContainer();
+    showTurnMessage("Your Turn");
     showPlayerSelectMsg();
+    hideMessage();
+    hideResetGameBtn();
 
     gameState = {
         deck: {},
@@ -417,6 +434,16 @@ resetGame = () => {
 showResetGameBtn = () => {
     let resetGameContainer = document.getElementById('resetGameContainer');
     resetGameContainer.classList.add('show');
+
+    hideComputerTurnInfo();
+    hidePlayerTurnInfo();
+    hideSelectedCardContainer();
+    hidePlayerSelectMsg();
+}
+
+hideResetGameBtn = () => {
+    let resetGameContainer = document.getElementById('resetGameContainer');
+    resetGameContainer.classList.remove('show');
 }
 
 const winnerMsg = () => {
@@ -448,7 +475,7 @@ const showCardsDrawn = (cards) => {
     playerTurnInfo.innerHTML = '';
 
     let p = document.createElement('p');
-    p.innerHTML = 'You Drew: ';
+    p.innerHTML = 'You Drew a... ';
     playerTurnInfo.append(p);
 
     cards.forEach(card => {
@@ -471,8 +498,13 @@ const showMessage = (msg) => {
     message.classList.add('show');
 }
 
-const showTurnMessage = (msg) => {
+const hideMessage = () => {
     const message = document.getElementById('message');
+    message.classList.remove('show');
+}
+
+const showTurnMessage = (msg) => {
+    const message = document.getElementById('turnMessage');
     message.innerHTML = msg;
     message.classList.add('show');
 }
@@ -514,7 +546,7 @@ const showComputerTurnInfo = (info) => {
     img.classList.add('computer-selected-card');
 
     let p = document.createElement('p');
-    p.innerHTML = `The computer has requested:`;
+    p.innerHTML = `The computer has requested a...`;
 
     computerTurnInfo.append(p);
     computerTurnInfo.append(img); 
@@ -545,10 +577,21 @@ const updateScore = () => {
     computerScoreContainer.innerHTML = `Computer Score: ${gameState.computer.score}`;
 }
 
+showErrorMsg = () => {
+    let errorMsg = document.getElementById('errorMsg');
+    errorMsg.classList.add('show');
+}
+
+hideErrorMsg = () => {
+    let errorMsg = document.getElementById('errorMsg');
+    errorMsg.classList.remove('show');
+}
+
 // Get a deck of cards
 const play = () => {
     // Create new deck
     newGame();
+    showTurnMessage("Your Turn");
 }
 
 play();
@@ -556,5 +599,3 @@ play();
 
 // @Todos
 // Add Tests
-// Make front end pretty
-// Add "Let's Play Go Fish!" animation before game starts

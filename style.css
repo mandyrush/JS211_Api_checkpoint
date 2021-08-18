@@ -1,14 +1,78 @@
+/*************** 
+Colors
+
+Navy #002366
+Blue #0F52BA
+Coral #FA8072
+Light Coral #FFDAB9
+Black #251F20
+***************/
+
+/*************** 
+Fonts
+
+font-family: 'Palette Mosaic', cursive;
+font-family: 'Poppins', sans-serif;
+***************/
+
+body {
+    background-color: #002366;
+    color: #FFDAB9;
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+}
+
 h1 {
     text-align: center;
+    margin: 0;
+    font-family: 'Palette Mosaic', cursive;
+    font-size: 50px;
 }
 
 p {
-    margin: 1rem;
+    margin: 1rem 0;
 }
 
-.game-info {
+header {
+    padding: 1rem 0;
+    color: #fff;
+}
+
+header p {
+    text-align: center;
+    margin-top: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+}
+
+main {
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: 30% 70%;
+}
+
+/*************** 
+Buttons 
+***************/
+.btn.btn-primary {
+    padding: 0.5rem 1.5rem;
+    background-color: transparent;
+    color: #fff;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: 2px solid #FA8072;
+    transition: all .2s ease-in-out;
+}
+
+.btn.btn-primary:hover,
+.btn.btn-primary:active,
+.btn.btn-primary:focus {
+    background-color: #FA8072;
+}
+
+
+.game-info {
+    background-color: #0F52BA;
+    min-height: 100vh;
 }
 
 .game-stats,
@@ -17,16 +81,19 @@ p {
 }
 
 #displayPlayerCards {
-    display: grid;
-    grid-template-columns: repeat(10, 100px);
+    display: flex;
+    flex-wrap: wrap;
+    padding-left: 170px;
+    padding-right: 1rem;
 }
 
 #displayPlayerCards .card {
     cursor: pointer;
+    margin-left: -150px;
 }
 
 #displayPlayerCards .card.selected img {
-    border: 3px solid red;
+    border: 3px solid #FA8072;
     border-radius: 15px;
     margin-top: -1rem;
 }
@@ -35,9 +102,7 @@ p {
 #selectedCardContainer {
     display: none;
     text-align: center;
-    padding: 1rem;
     margin: 1rem 0;
-    color: #000;
 }
 
 #playerSelectMsg.show,
@@ -48,8 +113,8 @@ p {
 #message {
     display: none;
     text-align: center;
-    font-size: 3rem;
-    color: blue;
+    font-size: 1.25rem;
+    color: #fff;
 }
 
 #message.show {
@@ -59,8 +124,8 @@ p {
 #turnMessage {
     display: none;
     text-align: center;
-    font-size: 3rem;
-    color: blue;
+    font-size: 1.5rem;
+    color: #FA8072;
 }
 
 #turnMessage.show {
@@ -87,8 +152,22 @@ p {
 
 #resetGameContainer {
     display: none;
+    text-align: center;
 }
 
 #resetGameContainer.show {
+    display: block;
+}
+
+#errorMsg {
+    display: none;
+    text-align: center;
+    color: red;
+    background-color: #fff;
+    border-radius: 15px;
+    padding: 1rem;
+}
+
+#errorMsg.show {
     display: block;
 }
